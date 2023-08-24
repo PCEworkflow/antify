@@ -21,12 +21,21 @@ contract SongLinkToken is ERC20, Ownable {
         uint256 tokensMinted;
         uint256 tokensSold;
         uint256 mintTimestamp;
+
+        uint256 totalPayment;
+        uint256 totalAmplifyFee;
+        uint256 totalVocalistPayment;
+        uint256 totalOriginalArtistPayment;
+        uint256 totalRecordLabelPayment;
+        uint256 totalRemixArtistPayment;
     }
 
     mapping(uint256 => TokenInfo) private _tokenInfo;
     mapping(uint256 => address[]) private _tokenBuyers; // Stores buyer addresses for each tokenId
     mapping(uint256 => uint256[]) private _tokenBuyerTimestamps; // Stores buyer timestamps for each tokenId
+    mapping(string => uint256[]) private _songToTokenId; // Maps song names to token IDs
     uint256 public tokenPrice;
+    uint256[] tokensUnique;  //keep track of legnth of unique tokenIds
 
     constructor(string memory name, string memory symbol, uint256 _tokenPrice) ERC20(name, symbol) {
         tokenPrice = _tokenPrice;
@@ -41,6 +50,7 @@ contract SongLinkToken is ERC20, Ownable {
         uint256 amount,
         address to,
         string memory songLink,
+        string memory songName, // Add song name parameter
         address vocalist,
         address originalArtist,
         address recordLabel,
@@ -66,6 +76,12 @@ contract SongLinkToken is ERC20, Ownable {
         tokenInfo.tokensSold = 0;
         tokenInfo.mintTimestamp = mintTimestamp;
 
+        // Update the song name to token ID mapping
+        _songToTokenId[songName].push(tokenId);
+
+        //Update the tokensUnique array
+        tokensUnique.push(tokenId);
+
         // Transfer the minted tokens to the provided address
         _transfer(address(this), to, amount);
     }
@@ -79,6 +95,9 @@ contract SongLinkToken is ERC20, Ownable {
 
         // Update token information with ETH value, buyer, and timestamp
         tokenInfo.ethValue += msg.value;
+
+        tokenInfo.totalPayment += tokenPrice; // Accumulate total payment
+
         _tokenBuyers[tokenId].push(msg.sender);
         _tokenBuyerTimestamps[tokenId].push(block.timestamp);
         tokenInfo.tokensSold++;
@@ -107,9 +126,6 @@ contract SongLinkToken is ERC20, Ownable {
         return (_tokenBuyers[tokenId][buyerIndex], _tokenBuyerTimestamps[tokenId][buyerIndex]);
     }
 
-    // function getTokensSold(uint256 tokenId) external view returns (uint256) {
-    //     return _tokenInfo[tokenId].tokensSold;
-    // }
 
     function transfer(address recipient, uint256 amount) public override returns (bool) {
         require(amount == 1, "You can only transfer 1 token");
@@ -127,6 +143,13 @@ contract SongLinkToken is ERC20, Ownable {
         uint256 totalPayment = tokenPrice; // Fixed token price for song link
         
         uint256[] memory payments = calculatePayments(totalPayment);
+
+        // Update accumulated payment values
+        tokenData.totalAmplifyFee += payments[0];
+        tokenData.totalVocalistPayment += payments[1];
+        tokenData.totalOriginalArtistPayment += payments[2];
+        tokenData.totalRecordLabelPayment += payments[3];
+        tokenData.totalRemixArtistPayment += payments[4];
 
         updatePaymentInfo(tokenData, payments);
 
@@ -179,6 +202,21 @@ contract SongLinkToken is ERC20, Ownable {
         }
     }
 
+    // function to add all buyers and timestamps to a dataframe
+    function getAllBuyers(uint256 tokenId) external view returns (address[] memory, uint256[] memory) {
+        return (_tokenBuyers[tokenId], _tokenBuyerTimestamps[tokenId]);
+    }
+
+    // Function to get token ID by song name
+    function getTokenIdBySongName(string memory songName) external view returns (uint256[] memory) {
+        return _songToTokenId[songName];
+    }
+
+    //Function to count number of values in tokensUnique array
+    function countValuesInArray() external view returns (uint256) {
+        return tokensUnique.length;
+    }
+
     // Function to get token information and payment details
     function getTokenInfo(uint256 tokenId)
         external
@@ -214,8 +252,8 @@ contract SongLinkToken is ERC20, Ownable {
             uint256 paymentRecordLabel,
             uint256 paymentRemixArtist,
             uint256 ethValue,
+
             uint256 tokensMinted,
-            uint256 tokensSold,
             uint256 mintTimestamp
         )
 
@@ -230,9 +268,42 @@ contract SongLinkToken is ERC20, Ownable {
             tokenData.paymentRemixArtist,
             tokenData.ethValue,
             tokenData.tokensMinted,
-            tokenData.tokensSold,
             tokenData.mintTimestamp
         );
+    }
+
+    function getTotalPaymentInfo(uint256 tokenId)
+        external
+        view
+        returns (
+
+            uint256 tokensMinted,
+            uint256 tokensSold,
+            uint256 mintTimestamp,
+            uint256 totalPayment,
+            uint256 totalAmplifyFee,
+            uint256 totalVocalistPayment,
+            uint256 totalOriginalArtistPayment,
+            uint256 totalRecordLabelPayment,
+            uint256 totalRemixArtistPayment
+        )
+
+    {
+        TokenInfo memory tokenData = _tokenInfo[tokenId];
+        return (
+
+            tokenData.tokensMinted,
+            tokenData.tokensSold,
+            tokenData.mintTimestamp,
+            tokenData.totalPayment,
+            tokenData.totalAmplifyFee,
+            tokenData.totalVocalistPayment,
+            tokenData.totalOriginalArtistPayment,
+            tokenData.totalRecordLabelPayment,
+            tokenData.totalRemixArtistPayment
+
+        );
+
     }
 
 }
