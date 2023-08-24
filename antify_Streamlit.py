@@ -6,11 +6,8 @@ import streamlit as st
 
 # Define and connect a new Web3 provider
 import os
-
-
 load_dotenv("web3_Ganache.env")
-infra_url= 'http://127.0.0.1:7545'
-w3 = Web3(Web3.HTTPProvider(infra_url))
+w3 = Web3(Web3.HTTPProvider(os.getenv("http")))
 ################################################################################
 # Contract Helper function:
 # 1. Loads the contract once using cache
@@ -18,7 +15,7 @@ w3 = Web3(Web3.HTTPProvider(infra_url))
 ################################################################################
 
 
-@st.cache(allow_output_mutation=True)
+@st.cache_resource
 def load_contract():
 
     # Load Art Gallery ABI
@@ -29,7 +26,7 @@ def load_contract():
     load_dotenv("contract_Antify.env")
     contract_address = os.getenv("contract_Address")
     # Get the contract using web3
-    contract = w3.eth.contract(address='0x894F8c2C4d915B1AC2fB2bfd712a9ACEb67cd582', abi=certificate_abi)
+    contract = w3.eth.contract(address=contract_address, abi=certificate_abi)
 
     return contract
 #load the contract
@@ -77,6 +74,7 @@ if song_Name:
 if st.button("Buy Song"):
     token_id = get_token_id(song_Name)
     buy_token(token_id)
+    st.balloons()
 
 
 # Display dropdown menu to select a token
@@ -85,6 +83,7 @@ selected_token_id = st.sidebar.selectbox("Select a token ID to buy", list(range(
 # Display button to buy the selected token
 if st.sidebar.button("Buy"):
     buy_token(selected_token_id)
+    st.sidebar.balloons()
 
 # Display information about the selected token
 st.write("Selected Token Information:")
