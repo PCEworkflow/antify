@@ -8,13 +8,8 @@ import streamlit as st
 import os
 load_dotenv("web3_Ganache.env")
 w3 = Web3(Web3.HTTPProvider(os.getenv("http")))
-################################################################################
-# Contract Helper function:
-# 1. Loads the contract once using cache
-# 2. Connects to the contract using the contract address and ABI
-################################################################################
 
-
+# Function to load the contract
 @st.cache_resource
 def load_contract():
 
