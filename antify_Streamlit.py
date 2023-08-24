@@ -13,7 +13,7 @@ w3 = Web3(Web3.HTTPProvider(os.getenv("http")))
 @st.cache_resource
 def load_contract():
 
-    # Load Art Gallery ABI
+    # Load Antify ABI
     with open(Path("abi_Antify.json")) as f:
         certificate_abi = json.load(f)
 
