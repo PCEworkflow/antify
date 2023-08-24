@@ -35,6 +35,25 @@ def load_contract():
 #load the contract
 contract = load_contract()
 
+# Create a function to link the song name to the token ID
+def get_token_id(song_Name):
+    try:
+        # Call the getTokenIdBySongName function in the smart contract
+        token_id = contract.functions.getTokenIdBySongName(song_Name).call()
+        return token_id[0]
+    except Exception as e:
+        st.error(f"Token ID not found: {str(e)}")
+
+def buy_token(token_id):
+    try:
+        # Call the buySongLink function in the smart contract
+        tx_hash = contract.functions.buySongLink(token_id).transact({'from': w3.eth.accounts[0], 'value': contract.functions.tokenPrice().call()})
+        st.success(f"Transaction successful! Transaction Hash: {tx_hash.hex()}")
+    except Exception as e:
+        st.error(f"Transaction failed: {str(e)}")
+
+
+
 #create streamlit title 
 st.title("Antify")
 
@@ -49,13 +68,16 @@ total_NumberOfSongs = contract.functions.countValuesInArray().call()
 # Create a enter text string to buy a token with a song name
 song_Name = st.text_input("Enter a song name to buy a token")
 
-def buy_token(token_id):
-    try:
-        # Call the buySongLink function in the smart contract
-        tx_hash = contract.functions.buySongLink(token_id).transact({'from': w3.eth.accounts[0], 'value': contract.functions.tokenPrice().call()})
-        st.success(f"Transaction successful! Transaction Hash: {tx_hash.hex()}")
-    except Exception as e:
-        st.error(f"Transaction failed: {str(e)}")
+#Show the token ID for the song name entered
+if song_Name:
+    token_id = get_token_id(song_Name)
+    st.write(f"Token ID: {token_id}")
+        
+# Create a button to buy the song 
+if st.button("Buy Song"):
+    token_id = get_token_id(song_Name)
+    buy_token(token_id)
+
 
 # Display dropdown menu to select a token
 selected_token_id = st.sidebar.selectbox("Select a token ID to buy", list(range(1, total_NumberOfSongs + 1)))
@@ -86,4 +108,10 @@ st.write(f"Record Label Payment: {Web3.from_wei(payment_info[7], 'ether')}")
 st.write(f"Remix Artist Payment: {Web3.from_wei(payment_info[8], 'ether')}")
 st.write(f"Total Payment: {Web3.from_wei(payment_info[3], 'ether')}")
 
+
+# Display button to show Buyer information
+if st.button("Show All Buyers Information"):
+    buyer_info = contract.functions.getAllBuyers(selected_token_id).call()
+    st.write(f"Buyer: {buyer_info[0]}")
+    st.write(f"Buyer Timestamp: {buyer_info[1]}")
 
