@@ -65,6 +65,10 @@ contract SongLinkToken is ERC20, Ownable {
 
         // Store token information in the ledger
         TokenInfo storage tokenInfo = _tokenInfo[tokenId]; // Get storage reference
+        
+        //Increment tokensMinted count if tokenId already exits
+        tokenInfo.tokensMinted+=amount;
+
         tokenInfo.owner = to;
         tokenInfo.songLink = songLink;
         tokenInfo.vocalist = vocalist;
@@ -72,15 +76,23 @@ contract SongLinkToken is ERC20, Ownable {
         tokenInfo.recordLabel = recordLabel;
         tokenInfo.remixArtist = remixArtist;
         tokenInfo.ethValue = 0;
-        tokenInfo.tokensMinted = amount;
         tokenInfo.tokensSold = 0;
         tokenInfo.mintTimestamp = mintTimestamp;
 
         // Update the song name to token ID mapping
         _songToTokenId[songName].push(tokenId);
 
-        //Update the tokensUnique array
-        tokensUnique.push(tokenId);
+        // Update the tokensUnique array if tokenId is unique
+        bool tokenIdExists = false;
+        for (uint256 i = 0; i < tokensUnique.length; i++) {
+            if (tokensUnique[i] == tokenId) {
+                tokenIdExists = true;
+                break;
+            }
+        }
+        if (!tokenIdExists) {
+            tokensUnique.push(tokenId);
+        }
 
         // Transfer the minted tokens to the provided address
         _transfer(address(this), to, amount);
