@@ -18,7 +18,7 @@ This is a smart contract implemented in Solidity that represents the SongLinkTok
 ## Contract Deployment
 
 1. Deploy the contract on the Ethereum blockchain using Remix, Truffle, or your preferred development environment.
-2. Set the initial token price using the `setTokenPrice` function.
+2. Set the initial token price using the `_TOKENPRICE` on deployment of the contract.
 3. Mint tokens using the `mintWithSongInfo` function by providing the required parameters.
 
 ## Usage
