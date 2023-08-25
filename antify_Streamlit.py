@@ -7,7 +7,7 @@ import streamlit as st
 # Define and connect a new Web3 provider
 import os
 load_dotenv("web3_Ganache.env")
-w3 = Web3(Web3.HTTPProvider(os.getenv("http")))
+w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 
 # Function to load the contract
 @st.cache_resource
@@ -21,7 +21,7 @@ def load_contract():
     load_dotenv("contract_Antify.env")
     contract_address = os.getenv("contract_Address")
     # Get the contract using web3
-    contract = w3.eth.contract(address=contract_address, abi=certificate_abi)
+    contract = w3.eth.contract(address= '0xa284dE91fF69C9911D00e61dD7d066404E1EEd03', abi=certificate_abi)
 
     return contract
 #load the contract
@@ -95,12 +95,12 @@ payment_info = contract.functions.getTotalPaymentInfo(selected_token_id).call()
 st.write(f"Tokens Minted: {payment_info[0]}")
 st.write(f"Tokens Sold: {payment_info[1]}")
 st.write(f"Mint Timestamp: {payment_info[2]}")
-st.write(f"Amplify Fee: {Web3.from_wei(payment_info[4], 'ether')}")
-st.write(f"Vocalist Payment: {Web3.from_wei(payment_info[5], 'ether')}")
-st.write(f"Original Artist Payment: {Web3.from_wei(payment_info[6], 'ether')}")
-st.write(f"Record Label Payment: {Web3.from_wei(payment_info[7], 'ether')}")
-st.write(f"Remix Artist Payment: {Web3.from_wei(payment_info[8], 'ether')}")
-st.write(f"Total Payment: {Web3.from_wei(payment_info[3], 'ether')}")
+st.write(f"Amplify Fee: {Web3.fromWei(payment_info[4], 'ether')}")
+st.write(f"Vocalist Payment: {Web3.fromWei(payment_info[5], 'ether')}")
+st.write(f"Original Artist Payment: {Web3.fromWei(payment_info[6], 'ether')}")
+st.write(f"Record Label Payment: {Web3.fromWei(payment_info[7], 'ether')}")
+st.write(f"Remix Artist Payment: {Web3.fromWei(payment_info[8], 'ether')}")
+st.write(f"Total Payment: {Web3.fromWei(payment_info[3], 'ether')}")
 
 
 # Display button to show Buyer information
