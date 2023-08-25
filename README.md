@@ -1,6 +1,4 @@
-## Antify
-
-# SongLinkToken Smart Contract
+# Antify Smart Contract
 
 This is a smart contract implemented in Solidity that represents the SongLinkToken, an ERC-20 token with additional functionality for managing song-related information and payments to various stakeholders.
 
